@@ -32,11 +32,13 @@ class Game():
         SpriteLib.FireBall.containers = self._playerShotsGroup, self._allGroup
         SpriteLib.Alien.containers = self._aliensGroup, self._allGroup
         SpriteLib.Explosion.containers = self._allGroup
+        SpriteLib.Interface.containers = self._allGroup
         
     def initGame(self):
         
         self._spaceShip = SpriteLib.SpaceShip(self._screenRect)
         self._alien1 = SpriteLib.Alien(self._screenRect,1,(10,10))
+        self._interface = SpriteLib.Interface(self._screenRect)
         
         self._allGroup.add(self._spaceShip)
         self._allGroup.add(self._alien1)
@@ -55,19 +57,9 @@ class Game():
             #handle player movement
             self._spaceShip.handleInput(keystate)
             
-                
-            if keystate[K_SPACE]:
-                fireBall1 = SpriteLib.FireBall(self._screenRect)
-                fireBall1.rect.top = self._spaceShip.rect.top - 10
-                fireBall1.rect.left = self._spaceShip.rect.left + 4
-                #self._allGroup.add(fireBall1)
-                fireBall1 = SpriteLib.FireBall(self._screenRect)
-                fireBall1.rect.top = self._spaceShip.rect.top - 10
-                fireBall1.rect.left = self._spaceShip.rect.right - 18
-                #self._allGroup.add(fireBall1)
+            #Temp - for testing
             if keystate[K_q]:
-                alien2 = SpriteLib.Alien(self._screenRect,1,(10,10))
-                #self._allGroup.add(alien2)
+                SpriteLib.Alien(self._screenRect,1,(10,10))
         
             collision = pygame.sprite.groupcollide(self._playerShotsGroup, self._aliensGroup, True, False)
             for shot in collision.iterkeys():
