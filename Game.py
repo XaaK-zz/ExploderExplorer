@@ -24,19 +24,22 @@ class Game():
         self._clock = pygame.time.Clock()
         
         #Group creation
-        self._all = pygame.sprite.Group()
-        
-        SpriteLib.SpaceShip.containers = self._all
-        SpriteLib.FireBall.containers = self._all
-        SpriteLib.Alien.containers = self._all
+        self._allGroup = pygame.sprite.Group()
+        self._playerShotsGroup = pygame.sprite.Group()
+        self._aliensGroup = pygame.sprite.Group()
+    
+        SpriteLib.SpaceShip.containers = self._allGroup
+        SpriteLib.FireBall.containers = self._playerShotsGroup, self._allGroup
+        SpriteLib.Alien.containers = self._aliensGroup, self._allGroup
+        SpriteLib.Explosion.containers = self._allGroup
         
     def initGame(self):
         
         self._spaceShip = SpriteLib.SpaceShip(self._screenRect)
         self._alien1 = SpriteLib.Alien(self._screenRect,1,(10,10))
         
-        self._all.add(self._spaceShip)
-        self._all.add(self._alien1)
+        self._allGroup.add(self._spaceShip)
+        self._allGroup.add(self._alien1)
         
     def gameLoop(self):
         
@@ -57,26 +60,34 @@ class Game():
                 fireBall1 = SpriteLib.FireBall(self._screenRect)
                 fireBall1.rect.top = self._spaceShip.rect.top - 10
                 fireBall1.rect.left = self._spaceShip.rect.left + 4
-                self._all.add(fireBall1)
+                #self._allGroup.add(fireBall1)
                 fireBall1 = SpriteLib.FireBall(self._screenRect)
                 fireBall1.rect.top = self._spaceShip.rect.top - 10
                 fireBall1.rect.left = self._spaceShip.rect.right - 18
-                self._all.add(fireBall1)
+                #self._allGroup.add(fireBall1)
             if keystate[K_q]:
                 alien2 = SpriteLib.Alien(self._screenRect,1,(10,10))
-                self._all.add(alien2)
+                #self._allGroup.add(alien2)
         
+            collision = pygame.sprite.groupcollide(self._playerShotsGroup, self._aliensGroup, True, False)
+            for shot in collision.iterkeys():
+                shot.hit(collision[shot][0])
+                
+            #for collision in pygame.sprite.groupcollide(self._playerShotsGroup, self._aliensGroup, True, False):
+                #alien.kill()
+            #    shot.hit(alien)
+            
              # clear/erase the last drawn sprites
-            self._all.clear(self._screen, self._background)
+            self._allGroup.clear(self._screen, self._background)
         
             #update all the sprites
-            self._all.update()
+            self._allGroup.update()
             
             #screen.blit(spaceShip, spaceShipRect)
             #pygame.display.flip()
         
              #draw the scene
-            dirty = self._all.draw(self._screen)
+            dirty = self._allGroup.draw(self._screen)
             #pygame.display.update(dirty)
             pygame.display.update()
             

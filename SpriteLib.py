@@ -8,7 +8,7 @@ class BaseSprite(pygame.sprite.Sprite):
     _images = []
     _speed = 10,0
     
-    def __init__(self,width,height,filename,timings,speed,screenRect):
+    def __init__(self,width,height,filename,timings,speed,screenRect,hitPoints=10):
         pygame.sprite.Sprite.__init__(self,self.containers)
         self._images = self.load_sliced_sprites(width,height,filename)
         self._anim = pyganim.PygAnimation(zip(self._images,timings))
@@ -20,6 +20,7 @@ class BaseSprite(pygame.sprite.Sprite):
         self.facing = -1
         self._speed = speed
         self._screen = screenRect
+        self._hitPoints = hitPoints
         
     def move(self):
         self.rect.move_ip(self._speed[0], self._speed[1])
@@ -39,6 +40,13 @@ class BaseSprite(pygame.sprite.Sprite):
             images.append(image)
         return images
 
+    def damage(self,hitPoints):
+        self._hitPoints -= hitPoints;
+        if self._hitPoints <= 0:
+            self.kill()
+            return True;
+        return False;
+    
 class SpaceShip(BaseSprite):
     def __init__(self, screenRect):
         BaseSprite.__init__(self,63,63,"SpaceShip5.png",[.05,.05],(10,10),screenRect)
@@ -48,23 +56,43 @@ class SpaceShip(BaseSprite):
         self.move()
         
 class FireBall(BaseSprite):
+    _damage = 10
+    
     def __init__(self, screenRect):
         BaseSprite.__init__(self,18,28,"FireBall2.png",[.05,.05],(0,-10),screenRect)
-
+    
     def update(self):
         BaseSprite.update(self)
         self.move()
         
-        #self.rect.left += self._speed[0]
-        #self.rect.top += self._speed[1]
         if self.rect.top  < 0:
             self.kill()
-                
+    
+    def hit(self,target):
+        if target.damage(self._damage):
+            Explosion(self._screen,1,self.rect)
+            return True;
+        else:
+            return False;
+
+class Explosion(BaseSprite):
+    def __init__(self, screenRect,type,location):
+        if type == 1:
+            BaseSprite.__init__(self,23,23,"Explosion2.png",[.05] * 8,(0,0),screenRect)
+        
+        #self._anim.loop = False
+        self.rect = location
+        
+    def update(self):
+        BaseSprite.update(self)
+        if self._anim.currentFrameNum == (self._anim.numFrames-1):
+            self.kill()
+            
 class Alien(BaseSprite):
     
     def __init__(self, screenRect,alienType,loc):
         if alienType == 1:
-            BaseSprite.__init__(self,60,38,"Bug1.png",[.2,.2],(10,0),screenRect)
+            BaseSprite.__init__(self,60,38,"Bug1.png",[.2,.2],(10,0),screenRect,1)
             
         self.facing = random.choice((-1,1)) * self._speed[0]
         self.rect.top = loc[0]
