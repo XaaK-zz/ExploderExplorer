@@ -16,7 +16,7 @@ class SimpleSprite(pygame.sprite.Sprite):
 class BaseSprite(pygame.sprite.Sprite):
     _speed = 10,0
     
-    def __init__(self,width,height,filename,speed,screenRect,hitPoints=10,transparent=True):
+    def __init__(self,width,height,filename,speed,screenRect,hitPoints=10,transparent=True,location=None):
         pygame.sprite.Sprite.__init__(self,self.containers)
         self.image = pygame.image.load(os.path.join('images', filename)).convert()
         if transparent:
@@ -25,6 +25,11 @@ class BaseSprite(pygame.sprite.Sprite):
         self._screen = screenRect
         self._hitPoints = hitPoints
         self._maxHitPoints = hitPoints
+        if location != None:
+            self.rect = self.image.get_rect(top=location[0],left=location[1])
+            
+            #self.rect.top = location[0]
+            #self.rect.left = location[1]
         
     def move(self):
         self.rect.move_ip(self._speed[0], self._speed[1])
@@ -63,8 +68,8 @@ class DamagingSprite:
 class AnimatedSprite(BaseSprite):
     _images = []
     
-    def __init__(self,width,height,filename,timings,speed,screenRect,hitPoints=10):
-        BaseSprite.__init__(self,width,height,filename,speed,screenRect,hitPoints)
+    def __init__(self,width,height,filename,timings,speed,screenRect,hitPoints=10,loc=None):
+        BaseSprite.__init__(self,width,height,filename,speed,screenRect,hitPoints,location=loc)
         
         #self._images = self.load_sliced_sprites(width,height,filename)
         self._images = self.load_sliced_sprites(width,height,self.image)
@@ -72,7 +77,8 @@ class AnimatedSprite(BaseSprite):
         self._anim.play()
         self.image = self._anim.getCurrentFrame()
         self._speed = speed
-        self.rect = self.image.get_rect(midbottom=screenRect.midbottom)
+        if loc == None:
+            self.rect = self.image.get_rect(midbottom=screenRect.midbottom)
         
     def update(self):
         self.image = self._anim.getCurrentFrame()
@@ -140,14 +146,14 @@ class Explosion(AnimatedSprite):
             
 class Alien(AnimatedSprite,DamagingSprite):
     
-    def __init__(self, screenRect,alienType,loc):
+    def __init__(self, screenRect,alienType,newLoc):
         if alienType == 1:
-            AnimatedSprite.__init__(self,60,38,"Bug1.png",[.2,.2],(10,0),screenRect,1)
+            AnimatedSprite.__init__(self,60,38,"Bug1.png",[.2,.2],(10,0),screenRect,1,loc=newLoc)
             DamagingSprite.__init__(self,20)
         
         self.facing = random.choice((-1,1)) * self._speed[0]
-        self.rect.top = loc[0]
-        self.rect.left = loc[1]
+        #self.rect.top = loc[0]
+        #self.rect.left = loc[1]
         
     def update(self):
         AnimatedSprite.update(self)
@@ -189,3 +195,12 @@ class Interface(BaseSprite):
         if self._currentPercentVisible < 0:
             self._currentPercentVisible = 0
         #print self._currentPercentVisible
+        
+class BackGroundImage(BaseSprite,DamagingSprite):
+
+     def __init__(self, screenRect,screen,newlocation):
+        BaseSprite.__init__(self,137,28,"SpikyBackground1.png",[0,0],screenRect,transparent=True,location=newlocation)
+        DamagingSprite.__init__(self,100)
+        self.mask = pygame.mask.from_surface(self.image)
+        
+        
