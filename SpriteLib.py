@@ -14,7 +14,6 @@ class SimpleSprite(pygame.sprite.Sprite):
         self._screen = screenRect
         
 class BaseSprite(pygame.sprite.Sprite):
-    _speed = 10,0
     
     def __init__(self,width,height,filename,speed,screenRect,hitPoints=10,transparent=True,location=None):
         pygame.sprite.Sprite.__init__(self,self.containers)
@@ -25,6 +24,7 @@ class BaseSprite(pygame.sprite.Sprite):
         self._screen = screenRect
         self._hitPoints = hitPoints
         self._maxHitPoints = hitPoints
+        self._speed = speed
         if location != None:
             self.rect = self.image.get_rect(top=location[0],left=location[1])
             
@@ -46,6 +46,9 @@ class BaseSprite(pygame.sprite.Sprite):
     
     def getHP(self):
         return self._hitPoints
+    
+    def getSpeed(self):
+        return self._speed
     
 class DamagingSprite:
     _damage = 10
@@ -78,8 +81,11 @@ class AnimatedSprite(BaseSprite):
         self.image = self._anim.getCurrentFrame()
         self._speed = speed
         if loc == None:
-            self.rect = self.image.get_rect(midbottom=screenRect.midbottom)
-        
+            self.rect = self.image.get_rect(midbottom=screenRect.midbottom,width=width,height=height)
+        else:
+            self.rect.width = width
+            self.rect.height = height
+            
     def update(self):
         self.image = self._anim.getCurrentFrame()
         
@@ -150,7 +156,12 @@ class Alien(AnimatedSprite,DamagingSprite):
         if alienType == 1:
             AnimatedSprite.__init__(self,60,38,"Bug1.png",[.2,.2],(10,0),screenRect,1,loc=newLoc)
             DamagingSprite.__init__(self,20)
-        
+        elif alienType == 2:
+            AnimatedSprite.__init__(self,139,84,"SpikyBlob.png",[.2,.2],(3,0),screenRect,1,loc=newLoc)
+            DamagingSprite.__init__(self,100)
+        elif alienType == 3:
+            AnimatedSprite.__init__(self,200,131,"SpikyMan.png",[.2,.2],(10,0),screenRect,1,loc=newLoc)
+            DamagingSprite.__init__(self,1)
         self.facing = random.choice((-1,1)) * self._speed[0]
         #self.rect.top = loc[0]
         #self.rect.left = loc[1]
@@ -196,11 +207,14 @@ class Interface(BaseSprite):
             self._currentPercentVisible = 0
         #print self._currentPercentVisible
         
-class BackGroundImage(BaseSprite,DamagingSprite):
+class EnviornmentComponent(BaseSprite,DamagingSprite):
 
-     def __init__(self, screenRect,screen,newlocation):
-        BaseSprite.__init__(self,137,28,"SpikyBackground1.png",[0,0],screenRect,transparent=True,location=newlocation)
+    def __init__(self, screenRect,screen,newlocation,speed):
+        BaseSprite.__init__(self,137,28,"SpikyBackground1.png",speed,screenRect,transparent=True,location=newlocation)
         DamagingSprite.__init__(self,100)
         self.mask = pygame.mask.from_surface(self.image)
         
+    def update(self):
+        BaseSprite.update(self)
+        self.move()
         

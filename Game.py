@@ -3,6 +3,8 @@ import os
 from pygame.locals import *
 import pyganim
 import SpriteLib
+import xml.etree.cElementTree as ET
+import Level
 
 #################################################################
 #Game Class
@@ -10,13 +12,16 @@ import SpriteLib
 #
 #################################################################
 class Game():
+    _currentLevelNumber=1
+    _levelData=None
+    _currentLevel=None
     
     ###########################################
     #Game Constructor
     #   Initialize the object but doesn't
     #       start game until initGame called
     ###########################################
-    def __init__(self,width,height):
+    def __init__(self,width,height,levelXMLDoc):
         
         pygame.init()
         size = width, height
@@ -44,7 +49,10 @@ class Game():
         SpriteLib.Alien.containers = self._aliensGroup, self._allGroup
         SpriteLib.Explosion.containers = self._allGroup
         SpriteLib.Interface.containers = self._allGroup
-        SpriteLib.BackGroundImage.containers = self._backgroundGroup, self._allGroup
+        SpriteLib.EnviornmentComponent.containers = self._backgroundGroup, self._allGroup
+        
+        #level doc
+        self._levelData = ET.parse(levelXMLDoc)
         
     ################################################
     #initGame
@@ -63,7 +71,20 @@ class Game():
         self._alien1 = SpriteLib.Alien(self._screenRect,1,(10,10))
         
         #temp - create background image
-        self._back1 = SpriteLib.BackGroundImage(self._screenRect,self._screen,(100,517))
+        #self._back1 = SpriteLib.EnviornmentComponent(self._screenRect,self._screen,(100,517),(0,1))
+    
+        self.initLevel(1)
+        
+    #####################################################################
+    #initLevel
+    #   Read the level information out of the stored xml level data and
+    #       populate the level-specific data
+    #####################################################################
+    def initLevel(self,levelNumber):
+        self._currentLevel = Level.Level(self._levelData,1,self._screenRect.height)
+        #self._currentLevelNumber=levelNumber
+        #temp = self._levelData.findall("//level[@number='" + str(levelNumber) + "']")
+        #print temp
         
     def gameLoop(self):
         
@@ -73,6 +94,17 @@ class Game():
                     (event.type == KEYDOWN and event.key == K_ESCAPE):
                     return
         
+            #update level data
+            envImages, enemies = self._currentLevel.update(1)
+            
+            for envImage in envImages:
+                print "creating backgound image"
+                SpriteLib.EnviornmentComponent(self._screenRect,self._screen,(0,envImage.xPos),
+                                               (envImage.movementX,envImage.movementY))
+            
+            for enemy in enemies:
+                SpriteLib.Alien(self._screenRect,int(enemy.type),(0,enemy.xPos))
+            
             #get key state                
             keystate = pygame.key.get_pressed()
             
@@ -82,11 +114,17 @@ class Game():
             #Temp - for testing
             if keystate[K_q]:
                 SpriteLib.Alien(self._screenRect,1,(10,10))
+            if keystate[K_w]:
+                SpriteLib.Alien(self._screenRect,2,(50,10))
+            if keystate[K_h]:
+                SpriteLib.Alien(self._screenRect,3,(70,10))
         
             #Collision Detection - shots vs aliens
-            collision = pygame.sprite.groupcollide(self._playerShotsGroup, self._aliensGroup, True, False)
+            collision = pygame.sprite.groupcollide(self._playerShotsGroup, self._aliensGroup, False, False)
             for shot in collision.iterkeys():
-                shot.hit(collision[shot][0])
+                if pygame.sprite.collide_mask(shot,collision[shot][0]):
+                    shot.hit(collision[shot][0])
+                    shot.kill()
              
             #Collision Detection - shots vs background
             pygame.sprite.groupcollide(self._playerShotsGroup, self._backgroundGroup, True, False,pygame.sprite.collide_mask)

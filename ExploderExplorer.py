@@ -1,7 +1,7 @@
 import Game
 
 def main():
-    newGame = Game.Game(640,480)
+    newGame = Game.Game(640,480,"levels.xml")
     newGame.initGame()
     newGame.gameLoop()
 

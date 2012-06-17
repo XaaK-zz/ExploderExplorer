@@ -1,0 +1,13 @@
+<ExploderExplorer>
+    <levels>
+        <level number="1" name="Test" height="2000">
+            <enviornmentImages>
+                <enviornmentImage globalYPos="100" xPos="517" type="1" movementX="0" movementY="1" />
+                <enviornmentImage globalYPos="600" xPos="517" type="1" movementX="0" movementY="1" />
+            </enviornmentImages>
+            <enemies>
+                <enemy globalYPos="400" xPos="10" type="1" />
+            </enemies>
+        </level>
+    </levels>
+</ExploderExplorer>
