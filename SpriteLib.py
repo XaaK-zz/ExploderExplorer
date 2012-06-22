@@ -47,6 +47,11 @@ class BaseSprite(pygame.sprite.Sprite):
     def getHP(self):
         return self._hitPoints
     
+    def addHP(self,hitPoints):
+        self._hitPoints += hitPoints
+        if self._hitPoints > self._maxHitPoints:
+            self._hitPoints = self._maxHitPoints
+            
     def getSpeed(self):
         return self._speed
     
@@ -162,6 +167,12 @@ class Alien(AnimatedSprite,DamagingSprite):
         elif alienType == 3:
             AnimatedSprite.__init__(self,200,131,"SpikyMan.png",[.2,.2],(10,0),screenRect,1,loc=newLoc)
             DamagingSprite.__init__(self,1)
+        elif alienType == 4:
+            AnimatedSprite.__init__(self,144,104,"RedStoneMonster.png",[.2,.2],(15,0),screenRect,1,loc=newLoc)
+            DamagingSprite.__init__(self,5)
+        elif alienType == 5:
+            AnimatedSprite.__init__(self,23,40,"LapisLazuMonster.png",[.2,.2],(5,0),screenRect,1,loc=newLoc)
+            DamagingSprite.__init__(self,10)
         self.facing = random.choice((-1,1)) * self._speed[0]
         #self.rect.top = loc[0]
         #self.rect.left = loc[1]
@@ -218,3 +229,20 @@ class EnviornmentComponent(BaseSprite,DamagingSprite):
         BaseSprite.update(self)
         self.move()
         
+class PowerUp(BaseSprite,DamagingSprite):
+    
+    def __init__(self, screenRect,screen,newlocation,speed,type):
+        print "ff"
+                
+        self._type = type
+        if type == 1:
+            BaseSprite.__init__(self,14,15,"PowerUp.png",speed,screenRect,transparent=True,location=newlocation)
+        DamagingSprite.__init__(self,0)
+    
+    def hit(self,target):
+        if self._type == 1:
+            target.addHP(10)
+            
+    def update(self):
+        BaseSprite.update(self)
+        self.move()
