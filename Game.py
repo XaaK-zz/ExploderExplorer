@@ -72,12 +72,7 @@ class Game():
         self._interface = SpriteLib.Interface(self._screenRect,self._screen)
         self._interface.setHitPoints(100,100)
         
-        #temp - create placeholder alien
-        self._alien1 = SpriteLib.Alien(self._screenRect,1,(10,10))
-        
-        #temp - create background image
-        #self._back1 = SpriteLib.EnviornmentComponent(self._screenRect,self._screen,(100,517),(0,1))
-    
+        #init the first level
         self.initLevel(1)
         
     #####################################################################
@@ -87,10 +82,11 @@ class Game():
     #####################################################################
     def initLevel(self,levelNumber):
         self._currentLevel = Level.Level(self._levelData,1,self._screenRect.height)
-        #self._currentLevelNumber=levelNumber
-        #temp = self._levelData.findall("//level[@number='" + str(levelNumber) + "']")
-        #print temp
         
+    #####################################################################
+    #gameLoop
+    #   Primary loop for the game
+    #####################################################################
     def gameLoop(self):
         
         while 1:
@@ -111,10 +107,6 @@ class Game():
                 self.doGamePlay()
             elif self._currentMode == GameState.GameOver:
                 self.doGameOver()
-            
-            #screen.blit(spaceShip, spaceShipRect)
-            #pygame.display.flip()
-        
             
             #cap the framerate
             self._clock.tick(30)
