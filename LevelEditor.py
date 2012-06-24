@@ -37,71 +37,30 @@ class DragShape:
 
 #----------------------------------------------------------------------
 
-class DragCanvas(wx.ScrolledWindow):
-    def __init__(self, parent, ID):
-        wx.ScrolledWindow.__init__(self, parent, ID)
+class DragableCanvasBitmap(wx.StaticBitmap):
+    def __init__(self, parent):
         self.shapes = []
         self.dragImage = None
         self.dragShape = None
         self.hiliteShape = None
-
-        self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
         
-        self.mainSizer = wx.BoxSizer(wx.HORIZONTAL)    
-        self.scrollPnlSizer = wx.BoxSizer(wx.VERTICAL)
+        self.img = wx.Image("temp.png", wx.BITMAP_TYPE_ANY)
+        self.img = wx.BitmapFromImage(self.img)
+        wx.StaticBitmap.__init__(self,parent, wx.ID_ANY,self.img)
         
-        #create panel for level data
-        self.levelPanel = scrolled.ScrolledPanel(self, -1, size=(200,400),
-                                 style = wx.TAB_TRAVERSAL|wx.SUNKEN_BORDER, name="levelPanel" )
-        
-        #bmp = wx.EmptyImage(480,1000,True).ConvertToBitmap()
-        #staticBitmap = wx.StaticBitmap(self.levelPanel, -1, bmp, (10, 10), (bmp.GetWidth(), bmp.GetHeight()))
-        img = wx.Image("temp.png", wx.BITMAP_TYPE_ANY)
-        staticBitmap = wx.StaticBitmap(self.levelPanel, wx.ID_ANY, wx.BitmapFromImage(img))
-        
-        #self.scrollPnlSizer.Add(staticBitmap, 1, wx.EXPAND | wx.ALL, 3)
-        self.scrollPnlSizer.Add(staticBitmap, 0, wx.ALL, 5)
-        self.levelPanel.SetSizer(self.scrollPnlSizer)
-        
-        self.mainSizer.Add(self.levelPanel,flag=wx.EXPAND)
-        
-        self.SetSizer(self.mainSizer)
-        #self.levelPanel.SetAutoLayout(1)
-        #self.levelPanel.SetupScrolling()
-        
-        #self.imagePanel = wx.Panel(self, -1)
-        
-        #self.scrollPanelSizer = wx.BoxSizer(wx.VERTICAL) 
-        #self.levelPanel.SetSizer(self.scrollPanelSizer) 
-        
-        self.levelPanel.SetupScrolling()
-        #self.__do_layout()
-  
-        # Make a shape from an image and mask.  This one will demo
+         # Make a shape from an image and mask.  This one will demo
         # dragging outside the window
         bmp = wx.Bitmap('images/LapisLazuMonster.png')
         shape = DragShape(bmp)
         shape.pos = (5, 5)
         self.shapes.append(shape)
-
+        
         self.Bind(wx.EVT_ERASE_BACKGROUND, self.OnEraseBackground)
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
         self.Bind(wx.EVT_LEFT_UP, self.OnLeftUp)
         self.Bind(wx.EVT_MOTION, self.OnMotion)
-        #self.Bind(wx.EVT_SIZE, self.OnSize)
-    
-    def __do_layout(self):
-        sizer_1 = wx.BoxSizer(wx.VERTICAL)
-        sizer_2 = wx.BoxSizer(wx.HORIZONTAL)
-        sizer_2.Add(self.levelPanel, 1, wx.EXPAND, 2)
-        sizer_2.Add(self.imagePanel, 1, wx.EXPAND, 0)
-        sizer_1.Add(sizer_2, 1, wx.EXPAND, 0)
-        self.SetSizer(sizer_1)
-        sizer_1.Fit(self)
-        self.Layout()
-        self.levelPanel.FitInside()
-         
+
     # Go through our list of shapes and draw them in whatever place they are.
     def DrawShapes(self, dc):
         for shape in self.shapes:
@@ -129,15 +88,10 @@ class DragCanvas(wx.ScrolledWindow):
     # Fired whenever a paint event occurs
     def OnPaint(self, evt):
         dc = wx.PaintDC(self)
+        dc.DrawBitmap(self.img,0,0,True)
         self.PrepareDC(dc)
         self.DrawShapes(dc)
-    
-    #def OnSize(self, event):
-        #print "onSize"
-        #self.levelPanel.Height = event.GetSize()[0]
-        #hsize = event.GetSize()[0] * 0.75
-        #self.SetSizeHints(minW=-1, minH=hsize, maxH=hsize)
-        #self.SetTitle(str(event.GetSize()))
+        #evt.Skip()
         
     # Left mouse button is down.
     def OnLeftDown(self, evt):
@@ -247,6 +201,72 @@ class DragCanvas(wx.ScrolledWindow):
             if unhiliteOld or hiliteNew:
                 self.dragImage.Show()
 
+#----------------------------------------------------------------------
+
+class LevelEditorWindow(wx.ScrolledWindow):
+    def __init__(self, parent, ID):
+        wx.ScrolledWindow.__init__(self, parent, ID)
+        
+
+        self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
+        
+        self.mainSizer = wx.BoxSizer(wx.HORIZONTAL)    
+        self.scrollPnlSizer = wx.BoxSizer(wx.VERTICAL)
+        
+        #create panel for level data
+        self.levelPanel = scrolled.ScrolledPanel(self, -1, size=(200,400),
+                                 style = wx.TAB_TRAVERSAL|wx.SUNKEN_BORDER, name="levelPanel" )
+        
+        #bmp = wx.EmptyImage(480,1000,True).ConvertToBitmap()
+        #staticBitmap = wx.StaticBitmap(self.levelPanel, -1, bmp, (10, 10), (bmp.GetWidth(), bmp.GetHeight()))
+        #img = wx.Image("temp.png", wx.BITMAP_TYPE_ANY)
+        #staticBitmap = wx.StaticBitmap(self.levelPanel, wx.ID_ANY, wx.BitmapFromImage(img))
+        staticBitmap = DragableCanvasBitmap(self.levelPanel)
+        
+        #self.scrollPnlSizer.Add(staticBitmap, 1, wx.EXPAND | wx.ALL, 3)
+        self.scrollPnlSizer.Add(staticBitmap, 0, wx.ALL, 5)
+        self.levelPanel.SetSizer(self.scrollPnlSizer)
+        
+        self.mainSizer.Add(self.levelPanel,flag=wx.EXPAND)
+        
+        self.SetSizer(self.mainSizer)
+        #self.levelPanel.SetAutoLayout(1)
+        #self.levelPanel.SetupScrolling()
+        
+        #self.imagePanel = wx.Panel(self, -1)
+        
+        #self.scrollPanelSizer = wx.BoxSizer(wx.VERTICAL) 
+        #self.levelPanel.SetSizer(self.scrollPanelSizer) 
+        
+        self.levelPanel.SetupScrolling()
+        #self.__do_layout()
+  
+       
+
+        
+        #self.Bind(wx.EVT_SIZE, self.OnSize)
+    
+    def __do_layout(self):
+        sizer_1 = wx.BoxSizer(wx.VERTICAL)
+        sizer_2 = wx.BoxSizer(wx.HORIZONTAL)
+        sizer_2.Add(self.levelPanel, 1, wx.EXPAND, 2)
+        sizer_2.Add(self.imagePanel, 1, wx.EXPAND, 0)
+        sizer_1.Add(sizer_2, 1, wx.EXPAND, 0)
+        self.SetSizer(sizer_1)
+        sizer_1.Fit(self)
+        self.Layout()
+        self.levelPanel.FitInside()
+         
+    
+    
+    #def OnSize(self, event):
+        #print "onSize"
+        #self.levelPanel.Height = event.GetSize()[0]
+        #hsize = event.GetSize()[0] * 0.75
+        #self.SetSizeHints(minW=-1, minH=hsize, maxH=hsize)
+        #self.SetTitle(str(event.GetSize()))
+        
+    
 
 
 class MyApp(wx.App):
@@ -254,7 +274,7 @@ class MyApp(wx.App):
         wx.App.__init__(self, redirect, filename)
         self.frame = wx.Frame(None, wx.ID_ANY, title='Exploder Explorer Level Editor')
 
-        self.panel = DragCanvas(self.frame, wx.ID_ANY)
+        self.panel = LevelEditorWindow(self.frame, wx.ID_ANY)
 
         self.frame.Show()
 
