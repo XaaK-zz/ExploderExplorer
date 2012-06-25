@@ -16,8 +16,16 @@ class SimpleSprite(pygame.sprite.Sprite):
 class BaseSprite(pygame.sprite.Sprite):
     
     def __init__(self,width,height,filename,speed,screenRect,hitPoints=10,transparent=True,location=None):
-        pygame.sprite.Sprite.__init__(self,self.containers)
-        self.image = pygame.image.load(os.path.join('images', filename)).convert()
+        try:
+            pygame.sprite.Sprite.__init__(self,self.containers)
+        except AttributeError:
+            pygame.sprite.Sprite.__init__(self)
+        
+        try:
+            self.image = pygame.image.load(os.path.join('images', filename)).convert()
+        except pygame.error:
+            self.image = pygame.image.load(os.path.join('images', filename))
+            
         if transparent:
             self.image.set_colorkey(self.image.get_at((0,0)), RLEACCEL)
         self.reloading = 0
