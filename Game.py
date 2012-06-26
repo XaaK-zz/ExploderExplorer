@@ -186,11 +186,11 @@ class Game():
         
         for envImage in envImages:
             print "creating backgound image"
-            SpriteLib.EnviornmentComponent(self._screenRect,self._screen,(0,envImage.xPos),
+            SpriteLib.EnviornmentComponent(int(envImage.type),self._screenRect,(0,envImage.xPos),
                                            (envImage.movementX,envImage.movementY))
         
         for enemy in enemies:
-            SpriteLib.Alien(self._screenRect,int(enemy.type),(0,enemy.xPos))
+            SpriteLib.Alien(int(enemy.type),self._screenRect,(0,enemy.xPos))
         
         #get key state                
         keystate = pygame.key.get_pressed()
@@ -200,17 +200,17 @@ class Game():
         
         #Temp - for testing
         if keystate[K_q]:
-            SpriteLib.Alien(self._screenRect,1,(10,10))
+            SpriteLib.Alien(1,self._screenRect,(10,10))
         if keystate[K_w]:
-            SpriteLib.Alien(self._screenRect,2,(50,10))
+            SpriteLib.Alien(2,self._screenRect,(50,10))
         if keystate[K_h]:
-            SpriteLib.Alien(self._screenRect,3,(70,10))
+            SpriteLib.Alien(3,self._screenRect,(70,10))
         if keystate[K_o]:
-            SpriteLib.Alien(self._screenRect,4,(10,10))
+            SpriteLib.Alien(4,self._screenRect,(10,10))
         if keystate[K_y]:
             SpriteLib.PowerUp(self._screenRect,self._screen,(0,50),(0,10),1)
         if keystate[K_k]:
-             SpriteLib.Alien(self._screenRect,5,(10,10))
+             SpriteLib.Alien(5,self._screenRect,(10,10))
         
     
     

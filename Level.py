@@ -12,7 +12,8 @@ class EnviornmentImage:
     type = 0
     movementX = 0
     movementY = 0
-
+    type = 0
+    
 class Enemy:
     globalYPos = 0
     xPos = 0
@@ -46,6 +47,7 @@ class Level:
             temp.type = int(eImage.attrib["type"])
             temp.movementX = int(eImage.attrib["movementX"])
             temp.movementY = int(eImage.attrib["movementY"])
+            temp.type = int(eImage.attrib["type"])
             self._enviornmentImages.append(temp)
         #load the enemies
         for enemy in self._levelNode.iterfind("enemies/enemy"):

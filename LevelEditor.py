@@ -63,17 +63,20 @@ class DragableCanvasBitmap(wx.StaticBitmap):
         self.Bind(wx.EVT_LEFT_UP, self.OnLeftUp)
         self.Bind(wx.EVT_MOTION, self.OnMotion)
 
-    def AddImage(self,imageType):
-        if imageType == 2:
-            temp = SpriteLib.Alien(Rect(0,0,0,0),2,(0,0))
-            s = pygame.image.tostring(temp.image, 'RGB')
-            img = wx.ImageFromData(temp.image.get_size()[0], temp.image.get_size()[1], s)
-            img = img.Scale(temp.image.get_size()[0]/2,temp.image.get_size()[1]/2,wx.IMAGE_QUALITY_HIGH)
-            bmp = wx.BitmapFromImage(img)
-            shape = DragShape(bmp)
-            shape.pos = (5, 5)
-            self.shapes.append(shape)
-            self.Refresh()
+    def AddImage(self,sprite):
+        width,height = sprite.getSize()
+        s = pygame.image.tostring(sprite.image, 'RGB')
+        img = wx.ImageFromData(width, height, s)
+        color = sprite.image.get_at((0,0))
+        img = img.Scale(width/2,height/2,wx.IMAGE_QUALITY_HIGH)
+        bmp = wx.BitmapFromImage(img)
+        mask = wx.Mask(bmp, (color.r,color.g,color.b))
+        
+        bmp.SetMask(mask)
+        shape = DragShape(bmp)
+        shape.pos = (5, 5)
+        self.shapes.append(shape)
+        self.Refresh()
             
     # Go through our list of shapes and draw them in whatever place they are.
     def DrawShapes(self, dc):
@@ -219,14 +222,13 @@ class DragableCanvasBitmap(wx.StaticBitmap):
 
 class LevelEditorWindow(wx.ScrolledWindow):
     def __init__(self, parent, ID):
-        wx.ScrolledWindow.__init__(self, parent, ID)
-        
+        wx.ScrolledWindow.__init__(self, parent, ID)  
 
         self.SetCursor(wx.StockCursor(wx.CURSOR_ARROW))
         
         self.mainSizer = wx.BoxSizer(wx.HORIZONTAL)    
         self.scrollPnlSizer = wx.BoxSizer(wx.VERTICAL)
-        self.contentSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.contentSizer = wx.FlexGridSizer(rows=2, cols=2, hgap=10, vgap=5)
         
         #create panel for level data
         self.levelPanel = scrolled.ScrolledPanel(self, -1, size=(350,400),
@@ -240,40 +242,25 @@ class LevelEditorWindow(wx.ScrolledWindow):
         self.mainSizer.Add(self.levelPanel,flag=wx.EXPAND)
         
         #add buttons for images
-        temp = SpriteLib.Alien(Rect(0,0,0,0),2,(0,0))
-        s = pygame.image.tostring(temp.image, 'RGB')
-        img = wx.ImageFromData(temp.image.get_size()[0], temp.image.get_size()[1], s)
-        bmp = wx.BitmapFromImage(img)
+        self.contentSizer.Add(self.addButton(SpriteLib.Alien(1),"1"))
+        self.contentSizer.Add(self.addButton(SpriteLib.Alien(2),"2"))
+        self.contentSizer.Add(self.addButton(SpriteLib.Alien(3),"3"))
+        self.contentSizer.Add(self.addButton(SpriteLib.Alien(4),"4"))
+        self.contentSizer.Add(self.addButton(SpriteLib.Alien(5),"5"))
+        self.contentSizer.Add(self.addButton(SpriteLib.EnviornmentComponent(1),"Env1"))
         
-        #bmp = wx.Bitmap(temp.image)
-        mask = wx.Mask(bmp, wx.WHITE)
-        bmp.SetMask(mask)
-        b = wx.BitmapButton(self, -1, bmp, (20, 20),
-                           (bmp.GetWidth()+10, bmp.GetHeight()+10),
-                           name="2")
-        b.Bind(wx.EVT_BUTTON, self.onButton)
-        
+        b = wx.Button(self, 10, "Save Level", (20, 20))
+        self.Bind(wx.EVT_BUTTON, self.OnSaveClick, b)
+        b.SetDefault()
+        b.SetSize(b.GetBestSize())
         self.contentSizer.Add(b)
-        
+
         self.mainSizer.Add(self.contentSizer)
         
         self.SetSizer(self.mainSizer)
-        #self.levelPanel.SetAutoLayout(1)
-        #self.levelPanel.SetupScrolling()
-        
-        #self.imagePanel = wx.Panel(self, -1)
-        
-        #self.scrollPanelSizer = wx.BoxSizer(wx.VERTICAL) 
-        #self.levelPanel.SetSizer(self.scrollPanelSizer) 
         
         self.levelPanel.SetupScrolling()
-        #self.__do_layout()
-  
-       
-
         
-        #self.Bind(wx.EVT_SIZE, self.OnSize)
-    
     def __do_layout(self):
         sizer_1 = wx.BoxSizer(wx.VERTICAL)
         sizer_2 = wx.BoxSizer(wx.HORIZONTAL)
@@ -285,23 +272,44 @@ class LevelEditorWindow(wx.ScrolledWindow):
         self.Layout()
         self.levelPanel.FitInside()
          
+    def OnSaveClick(self,event):
+        print "Save"
+        
     def onButton(self, event):
         button = event.GetEventObject()
         name = button.GetName()
-        if name == "2":
-            print "2 button pressed"
-            self.staticBitmap.AddImage(2)
-             
-    #def OnSize(self, event):
-        #print "onSize"
-        #self.levelPanel.Height = event.GetSize()[0]
-        #hsize = event.GetSize()[0] * 0.75
-        #self.SetSizeHints(minW=-1, minH=hsize, maxH=hsize)
-        #self.SetTitle(str(event.GetSize()))
-        
+        if name == "1":
+            temp = SpriteLib.Alien(1)
+        elif name == "2":
+            temp = SpriteLib.Alien(2)
+        elif name == "3":
+            temp = SpriteLib.Alien(3)
+        elif name == "4":
+            temp = SpriteLib.Alien(4)
+        elif name == "5":
+            temp = SpriteLib.Alien(5)
+        elif name == "Env1":
+            temp = SpriteLib.EnviornmentComponent(1)   
+        self.staticBitmap.AddImage(temp) 
+
+    def convertImage(self,image):
+        s = pygame.image.tostring(image, 'RGB')
+        img = wx.ImageFromData(image.get_size()[0], image.get_size()[1], s)
+        bmp = wx.BitmapFromImage(img)
+        color = image.get_at((0,0))
+        mask = wx.Mask(bmp, (color.r,color.g,color.b))
+        bmp.SetMask(mask)
+        return bmp   
+
+    def addButton(self,spriteObj,btnName):
+        bmp = self.convertImage(spriteObj.image)
+        b = wx.BitmapButton(self, -1, bmp, (20, 20),
+                           (bmp.GetWidth()+10, bmp.GetHeight()+10),
+                           name=btnName)
+        b.Bind(wx.EVT_BUTTON, self.onButton)
+        return b
     
-
-
+    
 class MyApp(wx.App):
     def __init__(self, redirect=False, filename=None):
         wx.App.__init__(self, redirect, filename)

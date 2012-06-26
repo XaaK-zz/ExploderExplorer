@@ -63,6 +63,9 @@ class BaseSprite(pygame.sprite.Sprite):
     def getSpeed(self):
         return self._speed
     
+    def getSize(self):
+        return self.image.get_size()
+    
 class DamagingSprite:
     _damage = 10
     
@@ -165,7 +168,12 @@ class Explosion(AnimatedSprite):
             
 class Alien(AnimatedSprite,DamagingSprite):
     
-    def __init__(self, screenRect,alienType,newLoc):
+    def __init__(self, alienType, screenRect = None,newLoc = None):
+        if screenRect is None:
+            screenRect = Rect(0,0,0,0)
+        if newLoc is None:
+            newLoc = (0,0)
+            
         if alienType == 1:
             AnimatedSprite.__init__(self,60,38,"Bug1.png",[.2,.2],(10,0),screenRect,1,loc=newLoc)
             DamagingSprite.__init__(self,20)
@@ -228,8 +236,16 @@ class Interface(BaseSprite):
         
 class EnviornmentComponent(BaseSprite,DamagingSprite):
 
-    def __init__(self, screenRect,screen,newlocation,speed):
-        BaseSprite.__init__(self,137,28,"SpikyBackground1.png",speed,screenRect,transparent=True,location=newlocation)
+    def __init__(self, envType, screenRect=None,newlocation=None,speed=None):
+        if screenRect is None:
+            screenRect = Rect(0,0,0,0)
+        if newlocation is None:
+            newlocation = (0,0)
+        if speed is None:
+            speed = (0,0)
+            
+        if envType == 1:
+            BaseSprite.__init__(self,137,28,"SpikyBackground1.png",speed,screenRect,transparent=True,location=newlocation)
         DamagingSprite.__init__(self,100)
         self.mask = pygame.mask.from_surface(self.image)
         
