@@ -244,7 +244,7 @@ class EnviornmentComponent(BaseSprite,DamagingSprite):
         if speed is None:
             speed = (0,0)
             
-        if envType == 1:
+        if int(envType) == 1:
             BaseSprite.__init__(self,137,28,"SpikyBackground1.png",speed,screenRect,transparent=True,location=newlocation)
         DamagingSprite.__init__(self,100)
         self.mask = pygame.mask.from_surface(self.image)

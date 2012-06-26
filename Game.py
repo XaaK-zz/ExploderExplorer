@@ -81,7 +81,8 @@ class Game():
     #       populate the level-specific data
     #####################################################################
     def initLevel(self,levelNumber):
-        self._currentLevel = Level.Level(self._levelData,1,self._screenRect.height)
+        self._currentLevel = Level.Level()
+        self._currentLevel.readLevelData(self._levelData,1,self._screenRect.height)
         
     #####################################################################
     #gameLoop
@@ -185,7 +186,6 @@ class Game():
         envImages, enemies = self._currentLevel.update(1)
         
         for envImage in envImages:
-            print "creating backgound image"
             SpriteLib.EnviornmentComponent(int(envImage.type),self._screenRect,(0,envImage.xPos),
                                            (envImage.movementX,envImage.movementY))
         

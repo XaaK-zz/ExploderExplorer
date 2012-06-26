@@ -1,12 +1,18 @@
 <ExploderExplorer>
     <levels>
-        <level number="1" name="Test" height="2000">
+        <level height="1000" name="First Level" number="1">
             <enviornmentImages>
-                <enviornmentImage globalYPos="100" xPos="517" type="1" movementX="0" movementY="1" />
-                <enviornmentImage globalYPos="600" xPos="517" type="1" movementX="0" movementY="1" />
+                <enviornmentImage globalYPos="269" movementX="0" movementY="0" type="1" xPos="498" />
             </enviornmentImages>
             <enemies>
-                <enemy globalYPos="400" xPos="10" type="1" />
+                <enemy globalYPos="995" type="4" xPos="10" />
+                <enemy globalYPos="995" type="3" xPos="10" />
+                <enemy globalYPos="632" type="4" xPos="446" />
+                <enemy globalYPos="532" type="3" xPos="82" />
+                <enemy globalYPos="588" type="5" xPos="396" />
+                <enemy globalYPos="589" type="5" xPos="348" />
+                <enemy globalYPos="589" type="5" xPos="308" />
+                <enemy globalYPos="175" type="2" xPos="252" />
             </enemies>
         </level>
     </levels>

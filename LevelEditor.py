@@ -1,20 +1,22 @@
-
 import  wx
 import  wx.lib.scrolledpanel as scrolled
 import SpriteLib
 from pygame.locals import *
 import sys, pygame
+import Level
 
 #----------------------------------------------------------------------
 
 class DragShape:
-    def __init__(self, bmp):
+    def __init__(self, bmp,spriteType,spriteSubType):
         self.bmp = bmp
         self.pos = (0,0)
         self.shown = True
         self.text = None
         self.fullscreen = False
-
+        self.spriteType = spriteType
+        self.spriteSubType = spriteSubType
+        
     def HitTest(self, pt):
         rect = self.GetRect()
         return rect.InsideXY(pt.x, pt.y)
@@ -63,7 +65,7 @@ class DragableCanvasBitmap(wx.StaticBitmap):
         self.Bind(wx.EVT_LEFT_UP, self.OnLeftUp)
         self.Bind(wx.EVT_MOTION, self.OnMotion)
 
-    def AddImage(self,sprite):
+    def AddImage(self,sprite,type,subType):
         width,height = sprite.getSize()
         s = pygame.image.tostring(sprite.image, 'RGB')
         img = wx.ImageFromData(width, height, s)
@@ -73,7 +75,7 @@ class DragableCanvasBitmap(wx.StaticBitmap):
         mask = wx.Mask(bmp, (color.r,color.g,color.b))
         
         bmp.SetMask(mask)
-        shape = DragShape(bmp)
+        shape = DragShape(bmp,type,subType)
         shape.pos = (5, 5)
         self.shapes.append(shape)
         self.Refresh()
@@ -273,24 +275,57 @@ class LevelEditorWindow(wx.ScrolledWindow):
         self.levelPanel.FitInside()
          
     def OnSaveClick(self,event):
-        print "Save"
+        lvl = Level.Level()
+        lvl.setLevelNumber(1)
+        lvl.setLevelName("First Level")
+        lvl.setLevelHeight(self.staticBitmap.GetSize()[1] * 2)
+        
+        for shape in self.staticBitmap.shapes:
+            if shape.spriteType == 1:
+                #enemy
+                newEnemy = Level.Enemy()
+                newEnemy.globalYPos = (self.staticBitmap.GetSize()[1] * 2) - (shape.pos[1] * 2)
+                newEnemy.xPos = shape.pos[0] * 2
+                newEnemy.type = shape.spriteSubType 
+                lvl.addEnemy(newEnemy)
+                
+            elif shape.spriteType == 2:
+                newEnv = Level.EnviornmentImage()
+                newEnv.globalYPos = (self.staticBitmap.GetSize()[1] * 2) - (shape.pos[1] * 2)
+                newEnv.xPos = shape.pos[0] * 2
+                newEnv.type = shape.spriteSubType
+                lvl.addImage(newEnv)
+                
+        lvl.writeLevelData()
         
     def onButton(self, event):
         button = event.GetEventObject()
         name = button.GetName()
         if name == "1":
             temp = SpriteLib.Alien(1)
+            type = 1
+            subType = 1
         elif name == "2":
             temp = SpriteLib.Alien(2)
+            type = 1
+            subType = 2
         elif name == "3":
             temp = SpriteLib.Alien(3)
+            type = 1
+            subType = 3
         elif name == "4":
             temp = SpriteLib.Alien(4)
+            type = 1
+            subType = 4
         elif name == "5":
             temp = SpriteLib.Alien(5)
+            type = 1
+            subType = 5
         elif name == "Env1":
-            temp = SpriteLib.EnviornmentComponent(1)   
-        self.staticBitmap.AddImage(temp) 
+            temp = SpriteLib.EnviornmentComponent(1)
+            type = 2
+            subType = 1
+        self.staticBitmap.AddImage(temp,type,subType) 
 
     def convertImage(self,image):
         s = pygame.image.tostring(image, 'RGB')
