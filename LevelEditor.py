@@ -65,7 +65,7 @@ class DragableCanvasBitmap(wx.StaticBitmap):
         self.Bind(wx.EVT_LEFT_UP, self.OnLeftUp)
         self.Bind(wx.EVT_MOTION, self.OnMotion)
 
-    def AddImage(self,sprite,type,subType):
+    def AddImage(self,sprite,type,subType,location):
         width,height = sprite.getSize()
         s = pygame.image.tostring(sprite.image, 'RGB')
         img = wx.ImageFromData(width, height, s)
@@ -76,7 +76,7 @@ class DragableCanvasBitmap(wx.StaticBitmap):
         
         bmp.SetMask(mask)
         shape = DragShape(bmp,type,subType)
-        shape.pos = (5, 5)
+        shape.pos = location
         self.shapes.append(shape)
         self.Refresh()
             
@@ -280,7 +280,7 @@ class LevelEditorWindow(wx.ScrolledWindow):
         lvl.setLevelName("First Level")
         lvl.setLevelHeight(self.staticBitmap.GetSize()[1] * 2)
         
-        for shape in self.staticBitmap.shapes:
+        for shape in sorted(self.staticBitmap.shapes,key=lambda x: (self.staticBitmap.GetSize()[1] * 2) - (x.pos[1] * 2)):
             if shape.spriteType == 1:
                 #enemy
                 newEnemy = Level.Enemy()
@@ -294,6 +294,7 @@ class LevelEditorWindow(wx.ScrolledWindow):
                 newEnv.globalYPos = (self.staticBitmap.GetSize()[1] * 2) - (shape.pos[1] * 2)
                 newEnv.xPos = shape.pos[0] * 2
                 newEnv.type = shape.spriteSubType
+                newEnv.movementY = 1
                 lvl.addImage(newEnv)
                 
         lvl.writeLevelData()
@@ -325,7 +326,9 @@ class LevelEditorWindow(wx.ScrolledWindow):
             temp = SpriteLib.EnviornmentComponent(1)
             type = 2
             subType = 1
-        self.staticBitmap.AddImage(temp,type,subType) 
+        print self.levelPanel.CalcScrolledPosition(5,5)
+        print self.levelPanel.CalcUnscrolledPosition(5,5)
+        self.staticBitmap.AddImage(temp,type,subType,self.levelPanel.CalcUnscrolledPosition(5,5)) 
 
     def convertImage(self,image):
         s = pygame.image.tostring(image, 'RGB')

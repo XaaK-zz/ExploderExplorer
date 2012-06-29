@@ -90,9 +90,11 @@ class Level:
         
         
     def update(self,speed):
+        #print self._currentLevelPosition
         self._currentLevelPosition += speed
         returnedEnvImages = []
         returnedEnemies = []
+        #for image in sorted(self._enviornmentImages,key=lambda img: img.globalYPos):
         for image in self._enviornmentImages:
             if (self._currentLevelPosition + self._screenHeight) > image.globalYPos:
                 returnedEnvImages.append(copy.deepcopy(image))
@@ -100,6 +102,7 @@ class Level:
             else:
                 break;
             
+        #for enemy in sorted(self._enemies,key=lambda img: img.globalYPos):
         for enemy in self._enemies:
             if (self._currentLevelPosition + self._screenHeight) > enemy.globalYPos:
                 returnedEnemies.append(copy.deepcopy(enemy))

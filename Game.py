@@ -186,11 +186,11 @@ class Game():
         envImages, enemies = self._currentLevel.update(1)
         
         for envImage in envImages:
-            SpriteLib.EnviornmentComponent(int(envImage.type),self._screenRect,(0,envImage.xPos),
+            SpriteLib.EnviornmentComponent(int(envImage.type),self._screenRect,(-100,envImage.xPos),
                                            (envImage.movementX,envImage.movementY))
         
         for enemy in enemies:
-            SpriteLib.Alien(int(enemy.type),self._screenRect,(0,enemy.xPos))
+            SpriteLib.Alien(int(enemy.type),self._screenRect,(-10,enemy.xPos))
         
         #get key state                
         keystate = pygame.key.get_pressed()
